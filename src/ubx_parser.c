@@ -1,11 +1,5 @@
 #include "ubx_parser.h"
-
-// Add one byte to the UBX 8-bit Fletcher checksum
-// Checksum does not include the two sync characters or the checksum bytes themselves
-static void ubx_checksum_update(ubx_parser_t *parser, uint8_t byte){
-	parser->checksum_a = (uint8_t)(parser->checksum_a + byte);
-	parser->checksum_b = (uint8_t)(parser->checksum_b + parser->checksum_a);
-}
+#include "ubx_internal.h"
 
 // Prepare to receive a UBX frame
 static void ubx_start_frame(ubx_parser_t *parser){
@@ -89,27 +83,27 @@ ubx_parse_result_t ubx_parser_feed(ubx_parser_t *parser, uint8_t byte, ubx_frame
 
 		case UBX_PARSER_CLASS:
 			parser->message_class = byte;
-			ubx_checksum_update(parser, byte);
+			ubx_checksum_update(&parser->checksum_a, &parser->checksum_b, byte);
 			parser->state = UBX_PARSER_ID;
 			break;
 
 		case UBX_PARSER_ID:
 			parser->message_id = byte;
-			ubx_checksum_update(parser, byte);
+			ubx_checksum_update(&parser->checksum_a, &parser->checksum_b, byte);
 			parser->state = UBX_PARSER_LENGTH_1;
 			break;
 
 		case UBX_PARSER_LENGTH_1:
 			// Low byte (UBX uses little-endian integers)
 			parser->payload_length = (uint16_t)byte;
-			ubx_checksum_update(parser, byte);
+			ubx_checksum_update(&parser->checksum_a, &parser->checksum_b, byte);
 			parser->state = UBX_PARSER_LENGTH_2;
 			break;
 
 		case UBX_PARSER_LENGTH_2:
 			// High byte (UBX uses little-endian integers)
 			parser->payload_length |= (uint16_t)((uint16_t)byte << 8);
-			ubx_checksum_update(parser, byte);
+			ubx_checksum_update(&parser->checksum_a, &parser->checksum_b, byte);
 
 			// Discard the payload plus the checksum bytes
 			if ((size_t)parser->payload_length > parser->payload_capacity){
@@ -133,7 +127,7 @@ ubx_parse_result_t ubx_parser_feed(ubx_parser_t *parser, uint8_t byte, ubx_frame
 		case UBX_PARSER_PAYLOAD:
 			parser->payload_buffer[parser->payload_index] = byte;
 			parser->payload_index++;
-			ubx_checksum_update(parser, byte);
+			ubx_checksum_update(&parser->checksum_a, &parser->checksum_b, byte);
 
 			if (parser->payload_index >= (size_t)parser->payload_length){
 				parser->state = UBX_PARSER_CHECKSUM_A;

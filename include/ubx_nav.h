@@ -77,7 +77,7 @@ typedef struct {
 	uint8_t minute; // UTC minute [0, 59]
 	uint8_t second; // UTC second [0, 60]
 
-	uint8_t valid; // UBX_NAV_PVT_VALID_* bit mask
+	uint8_t valid; // validity flags in bits 0-3, UTC standard in bits 4-7
 
 	uint32_t time_accuracy; // Time accuracy estimate [ns]
 	int32_t nanosecond;     // Fractional UTC second [ns]
