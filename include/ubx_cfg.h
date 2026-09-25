@@ -33,6 +33,10 @@
 // Type U1, key 0x20910007 = 1 output message per nav solution
 #define UBX_CFG_KEY_MSGOUT_NAV_PVT_UART1 UINT32_C(0x20910007)
 
+// Output rate of UBX-TIM-TP on the GNSS receiever's UART1 interface
+// Type U1, key 0x2091017E = 1 output message per nav solution
+#define UBX_CFG_KEY_MSGOUT_TIM_TP_UART1 UINT32_C(0x2091017E)
+
 typedef enum {
 	UBX_CFG_BUILD_OK = 0,
 	UBX_CFG_BUILD_NULL_ARGUMENT,
