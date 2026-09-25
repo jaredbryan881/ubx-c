@@ -1,40 +1,7 @@
 #include "ubx_nav.h"
+#include "ubx_internal.h"
 #include <stddef.h>
 #include <stdint.h>
-
-// Read unsigned little-endian integers from an unaligned byte buffer
-static uint16_t ubx_read_u16_le(const uint8_t *data){
-	return (uint16_t)(((uint16_t)data[0]) | 
-					  ((uint16_t)data[1] << 8));
-}
-
-static uint32_t ubx_read_u32_le(const uint8_t *data){
-	return ((uint32_t)data[0]) |
-		   ((uint32_t)data[1] << 8) |
-		   ((uint32_t)data[2] << 16) |
-		   ((uint32_t)data[3] << 24);
-}
-
-// Convert the little-endian bit pattern to a signed value
-static int16_t ubx_read_i16_le(const uint8_t *data){
-	uint16_t value = ubx_read_u16_le(data);
-
-	if (value <= INT16_MAX){
-		return (int16_t)value;
-	}
-
-	return (int16_t)((int32_t)value - 65536L);
-}
-
-static int32_t ubx_read_i32_le(const uint8_t *data){
-	uint32_t value = ubx_read_u32_le(data);
-
-	if (value <= INT32_MAX){
-		return (int32_t)value;
-	}
-
-	return (int32_t)((int64_t)value - 4294967296LL);
-}
 
 ubx_nav_pvt_decode_result_t ubx_nav_pvt_decode(const ubx_frame_t *frame, ubx_nav_pvt_t *output){
 	const uint8_t *payload;
