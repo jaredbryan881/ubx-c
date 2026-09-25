@@ -23,12 +23,39 @@ extern "C" {
 #define UBX_NAV_PVT_FULLY_RESOLVED      0x04U
 #define UBX_NAV_PVT_VALID_MAGNETIC_DECL 0x08U
 
+// UTC standard identifier in the upper four bits of the valid field
+#define UBX_NAV_PVT_UTC_STANDARD_MASK   0xF0U
+#define UBX_NAV_PVT_UTC_STANDARD_SHIFT  4U
+
 // Bits in the flags field
 #define UBX_NAV_PVT_FLAG_GNSS_FIX_OK    0x01U
 #define UBX_NAV_PVT_FLAG_DIFFERENTIAL   0x02U
 #define UBX_NAV_PVT_FLAG_PSM_STATE_MASK 0x1CU
 #define UBX_NAV_PVT_FLAG_HEAD_VEH_VALID 0x20U
 #define UBX_NAV_PVT_FLAG_CARRIER_MASK   0xC0U
+
+// Bits in the flags2 field
+#define UBX_NAV_PVT_FLAG2_CONFIRMED_AVAILABLE 0x20U
+#define UBX_NAV_PVT_FLAG2_CONFIRMED_DATE      0x40U
+#define UBX_NAV_PVT_FLAG2_CONFIRMED_TIME      0x80U
+
+// Values in the UTC standard portion of the valid field
+typedef enum {
+	UBX_NAV_PVT_UTC_STANDARD_UNAVAILABLE = 0,
+	UBX_NAV_PVT_UTC_STANDARD_CRL         = 1,
+	UBX_NAV_PVT_UTC_STANDARD_NIST        = 2,
+	UBX_NAV_PVT_UTC_STANDARD_USNO        = 3,
+	UBX_NAV_PVT_UTC_STANDARD_BIPM        = 4,
+	UBX_NAV_PVT_UTC_STANDARD_EUROPE      = 5,
+	UBX_NAV_PVT_UTC_STANDARD_SU          = 6,
+	UBX_NAV_PVT_UTC_STANDARD_NTSC        = 7,
+	UBX_NAV_PVT_UTC_STANDARD_NPLI        = 8,
+	UBX_NAV_PVT_UTC_STANDARD_UNKNOWN     = 15
+} ubx_nav_pvt_utc_standard_t;
+
+static inline ubx_nav_pvt_utc_standard_t ubx_nav_pvt_get_utc_standard(uint8_t valid){
+	return (ubx_nav_pvt_utc_standard_t)((valid & UBX_NAV_PVT_UTC_STANDARD_MASK) >> UBX_NAV_PVT_UTC_STANDARD_SHIFT);
+}
 
 // Values in the fix_type field
 typedef enum {
