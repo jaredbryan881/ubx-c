@@ -57,4 +57,15 @@ static inline void ubx_write_u32_le(uint8_t *data, uint32_t value){
 	data[3] = (uint8_t)(value >> 24U);
 }
 
+// signed 8-bit decoder
+static inline int8_t ubx_read_i8(const uint8_t *data){
+	uint8_t value = data[0];
+
+	if (value <= INT8_MAX){
+		return (int8_t)value;
+	}
+
+	return (int8_t)((int16_t)value - 256);
+}
+
 #endif
