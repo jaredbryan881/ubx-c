@@ -1,27 +1,28 @@
 #include "ubx_cfg.h"
 #include "ubx_internal.h"
+#include <stdbool.h>
 
 #define UBX_CFG_KEY_STORAGE_SHIFT 28U
 #define UBX_CFG_KEY_STORAGE_MASK  0x07U
 #define UBX_CFG_KEY_FIELD_LENGTH  4U
 #define UBX_CFG_VALSET_MAX_ITEMS  64U
 
-static uint8_t ubx_cfg_valget_layer_is_valid(uint8_t layer){
-	return (uint8_t)((layer == UBX_CFG_VALGET_LAYER_RAM) ||
-					 (layer == UBX_CFG_VALGET_LAYER_BBR) ||
-					 (layer == UBX_CFG_VALGET_LAYER_FLASH) ||
-					 (layer == UBX_CFG_VALGET_LAYER_DEFAULT));
+static bool ubx_cfg_valget_layer_is_valid(uint8_t layer){
+	return (layer == UBX_CFG_VALGET_LAYER_RAM) ||
+		   (layer == UBX_CFG_VALGET_LAYER_BBR) ||
+		   (layer == UBX_CFG_VALGET_LAYER_FLASH) ||
+		   (layer == UBX_CFG_VALGET_LAYER_DEFAULT);
 }
 
 static ubx_cfg_key_storage_t ubx_cfg_key_storage(uint32_t key){
-	return (ubx_cfg_key_storage_t)((key >> UBX_CFG_KEY_STORAGE_SHIFT) & (UBX_CFG_KEY_STORAGE_MASK));
+	const uint32_t raw = (key >> UBX_CFG_KEY_STORAGE_SHIFT) & UBX_CFG_KEY_STORAGE_MASK;
+
+	return (ubx_cfg_key_storage_t)raw;
 }
 
 static uint8_t ubx_cfg_storage_value_length(ubx_cfg_key_storage_t storage){
 	switch (storage){
 	case UBX_CFG_KEY_STORAGE_L:
-		return 1U;
-
 	case UBX_CFG_KEY_STORAGE_ONE_BYTE:
 		return 1U;
 
@@ -242,7 +243,7 @@ ubx_cfg_build_result_t ubx_cfg_valget_begin(ubx_cfg_valget_builder_t *builder,
 		return UBX_CFG_BUILD_NULL_ARGUMENT;
 	}
 
-	if (ubx_cfg_valget_layer_is_valid(layer) == 0U){
+	if (!ubx_cfg_valget_layer_is_valid(layer)){
 		return UBX_CFG_BUILD_INVALID_LAYER;
 	}
 
@@ -320,7 +321,7 @@ ubx_cfg_decode_result_t ubx_cfg_valget_iterator_init(const ubx_frame_t *frame,
 		return UBX_CFG_DECODE_WRONG_VERSION;
 	}
 
-	if (ubx_cfg_valget_layer_is_valid(payload[1]) == 0U){
+	if (!ubx_cfg_valget_layer_is_valid(payload[1])){
 		return UBX_CFG_DECODE_INVALID_LAYER;
 	}
 
@@ -490,7 +491,9 @@ ubx_cfg_decode_result_t ubx_cfg_valget_item_get_i1(const ubx_cfg_valget_item_t *
 		*value = (int8_t)raw_value;
 	}
 	else{
-		*value =(int8_t)(-1 - (int16_t)(UINT8_MAX - raw_value));
+		const int16_t widened = (int16_t)((int16_t)raw_value - 256);
+
+		*value = (int8_t)widened;
 	}
 
 	return UBX_CFG_DECODE_OK;

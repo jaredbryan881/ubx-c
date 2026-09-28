@@ -54,7 +54,9 @@ typedef enum {
 } ubx_nav_pvt_utc_standard_t;
 
 static inline ubx_nav_pvt_utc_standard_t ubx_nav_pvt_get_utc_standard(uint8_t valid){
-	return (ubx_nav_pvt_utc_standard_t)((valid & UBX_NAV_PVT_UTC_STANDARD_MASK) >> UBX_NAV_PVT_UTC_STANDARD_SHIFT);
+	const uint32_t raw = ((uint32_t)valid & UBX_NAV_PVT_UTC_STANDARD_MASK) >> UBX_NAV_PVT_UTC_STANDARD_SHIFT;
+
+	return (ubx_nav_pvt_utc_standard_t)raw;
 }
 
 // Values in the fix_type field

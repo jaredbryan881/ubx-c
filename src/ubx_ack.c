@@ -1,4 +1,5 @@
 #include "ubx_ack.h"
+#include <stddef.h>
 
 ubx_ack_decode_result_t ubx_ack_decode(const ubx_frame_t *frame, ubx_ack_t *ack){
 	if ((frame == NULL) || (ack == NULL)){
@@ -11,6 +12,10 @@ ubx_ack_decode_result_t ubx_ack_decode(const ubx_frame_t *frame, ubx_ack_t *ack)
 
 	if (frame->payload_length != UBX_ACK_PAYLOAD_LENGTH){
 		return UBX_ACK_DECODE_WRONG_LENGTH;
+	}
+
+	if (frame->payload == NULL){
+		return UBX_ACK_DECODE_NULL_ARGUMENT;
 	}
 
 	switch (frame->message_id){

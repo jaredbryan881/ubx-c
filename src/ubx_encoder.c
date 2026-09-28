@@ -6,7 +6,6 @@
 #define UBX_ENCODER_SYNC_CHAR_2 0x62U
 
 #define UBX_ENCODER_HEADER_LENGTH   6U
-#define UBX_ENCODER_CHECKSUM_LENGTH 2U
 
 ubx_encode_result_t ubx_encode_frame(uint8_t message_class,
 									 uint8_t message_id,

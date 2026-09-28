@@ -79,6 +79,9 @@ ubx_parse_result_t ubx_parser_feed(ubx_parser_t *parser, uint8_t byte, ubx_frame
 			else if (byte != UBX_SYNC_CHAR_1){
 				parser->state = UBX_PARSER_SYNC_1;
 			}
+			else{
+				// Repeated first sync character, stay in UBX_PARSER_SYNC_2
+			}
 			break;
 
 		case UBX_PARSER_CLASS:
