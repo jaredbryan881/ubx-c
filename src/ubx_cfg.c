@@ -129,7 +129,7 @@ ubx_cfg_build_result_t ubx_cfg_valset_begin(ubx_cfg_valset_builder_t *builder, u
 	builder->buffer   = buffer;
 	builder->capacity = capacity;
 	builder->length   = UBX_CFG_VALSET_HEADER_LENGTH;
-	builder->iterm_count = 0U;
+	builder->item_count = 0U;
 
 	return UBX_CFG_BUILD_OK;
 }
