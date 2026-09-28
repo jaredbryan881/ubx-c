@@ -45,7 +45,7 @@ static inline int32_t ubx_read_i32_le(const uint8_t *data){
 }
 
 // Write unsigned integers into an unaligned little-endian byte buffer
-static inline void ubx_write_u16_le(uint8_t *data, uint32_t value){
+static inline void ubx_write_u16_le(uint8_t *data, uint16_t value){
 	data[0] = (uint8_t)(value);
 	data[1] = (uint8_t)(value >> 8U);
 }
