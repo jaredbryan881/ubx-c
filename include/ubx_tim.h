@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include "ubx_parser.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define UBX_TIM_CLASS             0x0DU
 #define UBX_TIM_TP_ID             0x01U
 #define UBX_TIM_TP_PAYLOAD_LENGTH 16U
@@ -44,5 +48,9 @@ typedef enum {
 } ubx_tim_tp_decode_result_t;
 
 ubx_tim_tp_decode_result_t ubx_tim_tp_decode(const ubx_frame_t *frame, ubx_tim_tp_t *output);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

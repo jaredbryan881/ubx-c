@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include "ubx_parser.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define UBX_ACK_CLASS          0x05U
 #define UBX_ACK_NAK_ID         0x00U
 #define UBX_ACK_ACK_ID         0x01U
@@ -30,5 +34,9 @@ typedef enum {
 } ubx_ack_decode_result_t;
 
 ubx_ack_decode_result_t ubx_ack_decode(const ubx_frame_t *frame, ubx_ack_t *ack);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
