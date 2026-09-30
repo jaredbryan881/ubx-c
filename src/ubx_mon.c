@@ -18,7 +18,7 @@ ubx_mon_validate_message(const ubx_frame_t *frame, uint8_t message_id) {
 
 static void ubx_mon_copy_string(char *destination, const uint8_t *source,
                                 uint16_t field_length) {
-  memcpy(destination, source, field_length);
+  (void)memcpy(destination, source, field_length);
   destination[field_length] = '\0';
 }
 
@@ -228,8 +228,8 @@ ubx_mon_decode_result_t ubx_mon_comms_decode(const ubx_frame_t *frame,
   output->port_count = port_count;
   output->tx_errors = frame->payload[2];
 
-  memcpy(output->protocol_ids, &frame->payload[4],
-         UBX_MON_COMMS_PROTOCOL_COUNT);
+  (void)memcpy(output->protocol_ids, &frame->payload[4],
+               UBX_MON_COMMS_PROTOCOL_COUNT);
 
   return UBX_MON_DECODE_OK;
 }

@@ -26,7 +26,7 @@ static inline uint32_t ubx_read_u32_le(const uint8_t *data) {
 static inline int16_t ubx_read_i16_le(const uint8_t *data) {
   uint16_t value = ubx_read_u16_le(data);
 
-  if (value <= INT16_MAX) {
+  if (value <= (uint16_t)INT16_MAX) {
     return (int16_t)value;
   }
 
@@ -36,7 +36,7 @@ static inline int16_t ubx_read_i16_le(const uint8_t *data) {
 static inline int32_t ubx_read_i32_le(const uint8_t *data) {
   uint32_t value = ubx_read_u32_le(data);
 
-  if (value <= INT32_MAX) {
+  if (value <= (uint32_t)INT32_MAX) {
     return (int32_t)value;
   }
 
@@ -60,7 +60,7 @@ static inline void ubx_write_u32_le(uint8_t *data, uint32_t value) {
 static inline int8_t ubx_read_i8(const uint8_t *data) {
   uint8_t value = data[0];
 
-  if (value <= INT8_MAX) {
+  if (value <= (uint8_t)INT8_MAX) {
     return (int8_t)value;
   }
 
