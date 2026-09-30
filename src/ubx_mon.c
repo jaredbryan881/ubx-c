@@ -355,11 +355,11 @@ ubx_mon_decode_result_t ubx_mon_rf_block_decode(const ubx_frame_t *frame,
 
   output->cw_suppression = block[16];
 
-  output->i_offset = ubx_read_i8(block[17]);
+  output->i_offset = ubx_read_i8(&block[17]);
 
   output->i_magnitude = block[18];
 
-  output->q_offset = ubx_read_i8(block[19]);
+  output->q_offset = ubx_read_i8(&block[19]);
 
   output->q_magnitude = block[20];
 
@@ -410,7 +410,7 @@ ubx_mon_decode_result_t ubx_mon_sys_decode(const ubx_frame_t *frame,
 
   output->error_count = ubx_read_u16_le(&frame->payload[16]);
 
-  output->temperature = ubx_read_i8(frame->payload[18]);
+  output->temperature = ubx_read_i8(&frame->payload[18]);
 
   return UBX_MON_DECODE_OK;
 }
