@@ -7,9 +7,11 @@
 // Output rate of UBX-NAV-PVT on the GNSS receiver's UART1 interface
 // Type U1, key 0x20910007 = 1 output message per nav solution
 #define UBX_CFG_KEY_MSGOUT_NAV_PVT_UART1 UINT32_C(0x20910007)
-// Output rate of UBX-TIM-TP on the GNSS recei`ver's UART1 interface
+// Output rate of UBX-TIM-TP on the GNSS receiver's UART1 interface
 // Type U1, key 0x2091017E = 1 output message per nav solution
 #define UBX_CFG_KEY_MSGOUT_TIM_TP_UART1 UINT32_C(0x2091017E)
+// Raw observations on the GNSS receiver's UART1 interface
+#define UBX_CFG_KEY_MSGOUT_RXM_RAWX_UART1 UINT32_C(0x209102A5)
 
 // Navigation and measurement rate
 #define UBX_CFG_KEY_RATE_MEAS    UINT32_C(0x30210001)

@@ -2,6 +2,8 @@
 #define UBX_INTERNAL_H
 
 #include <stdint.h>
+#include <float.h>
+#include <string.h>
 
 // Add one byte to the UBX 8-bit Fletcher checksum
 // Checksum does not include the two sync characters or the checksum bytes themselves
@@ -21,6 +23,33 @@ static inline uint32_t ubx_read_u32_le(const uint8_t *data){
 		   ((uint32_t)data[1] << 8U) |
 		   ((uint32_t)data[2] << 16U) |
 		   ((uint32_t)data[3] << 24U);
+}
+
+static inline uint64_t ubx_read_u64_le(const uint8_t *data){
+	return ((uint64_t)data[0]) |
+		   ((uint64_t)data[1] << 8U) |
+		   ((uint64_t)data[2] << 16U) |
+		   ((uint64_t)data[3] << 24U) |
+		   ((uint64_t)data[4] << 32U) |
+		   ((uint64_t)data[5] << 40U) |
+		   ((uint64_t)data[6] << 48U) |
+		   ((uint64_t)data[7] << 56U);
+}
+
+// Read little-endian floating-point values from an unaligned byte buffer
+// First build the integer using the encoded bits, then interpret it as a float or double
+static inline float ubx_read_r4_le(const uint8_t *data){
+	uint32_t bits = ubx_read_u32_le(data);
+	float value;
+	memcpy(&value, &bits, sizeof(value));
+	return value;
+}
+
+static inline double ubx_read_r8_le(const uint8_t *data){
+	uint64_t bits = ubx_read_u64_le(data);
+	double value;
+	memcpy(&value, &bits, sizeof(value));
+	return value;
 }
 
 // Convert the little-endian bit pattern to a signed value
