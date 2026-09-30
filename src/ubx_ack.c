@@ -1,38 +1,39 @@
 #include "ubx_ack.h"
 #include <stddef.h>
 
-ubx_ack_decode_result_t ubx_ack_decode(const ubx_frame_t *frame, ubx_ack_t *ack){
-	if ((frame == NULL) || (ack == NULL)){
-		return UBX_ACK_DECODE_NULL_ARGUMENT;
-	}
+ubx_ack_decode_result_t ubx_ack_decode(const ubx_frame_t *frame,
+                                       ubx_ack_t *ack) {
+  if ((frame == NULL) || (ack == NULL)) {
+    return UBX_ACK_DECODE_NULL_ARGUMENT;
+  }
 
-	if (frame->message_class != UBX_ACK_CLASS){
-		return UBX_ACK_DECODE_WRONG_CLASS;
-	}
+  if (frame->message_class != UBX_ACK_CLASS) {
+    return UBX_ACK_DECODE_WRONG_CLASS;
+  }
 
-	if (frame->payload_length != UBX_ACK_PAYLOAD_LENGTH){
-		return UBX_ACK_DECODE_WRONG_LENGTH;
-	}
+  if (frame->payload_length != UBX_ACK_PAYLOAD_LENGTH) {
+    return UBX_ACK_DECODE_WRONG_LENGTH;
+  }
 
-	if (frame->payload == NULL){
-		return UBX_ACK_DECODE_NULL_ARGUMENT;
-	}
+  if (frame->payload == NULL) {
+    return UBX_ACK_DECODE_NULL_ARGUMENT;
+  }
 
-	switch (frame->message_id){
-		case UBX_ACK_ACK_ID:
-			ack->type = UBX_ACK_TYPE_ACK;
-			break;
+  switch (frame->message_id) {
+  case UBX_ACK_ACK_ID:
+    ack->type = UBX_ACK_TYPE_ACK;
+    break;
 
-		case UBX_ACK_NAK_ID:
-			ack->type = UBX_ACK_TYPE_NAK;
-			break;
+  case UBX_ACK_NAK_ID:
+    ack->type = UBX_ACK_TYPE_NAK;
+    break;
 
-		default:
-			return UBX_ACK_DECODE_WRONG_ID;
-	}
+  default:
+    return UBX_ACK_DECODE_WRONG_ID;
+  }
 
-	ack->acknowledged_class = frame->payload[0];
-	ack->acknowledged_id    = frame->payload[1];
+  ack->acknowledged_class = frame->payload[0];
+  ack->acknowledged_id = frame->payload[1];
 
-	return UBX_ACK_DECODE_OK;
+  return UBX_ACK_DECODE_OK;
 }
