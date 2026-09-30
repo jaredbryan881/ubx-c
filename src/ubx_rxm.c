@@ -29,7 +29,8 @@ ubx_rxm_pmreq_build_backup(const ubx_rxm_pmreq_backup_t *request,
     return UBX_RXM_PMREQ_BUILD_INVALID_FORCE;
   }
 
-  if ((request->wakeup_sources & (uint32_t)~UBX_RXM_PMREQ_WAKEUP_MASK) != 0U) {
+  if ((request->wakeup_sources | UBX_RXM_PMREQ_WAKEUP_MASK) !=
+      UBX_RXM_PMREQ_WAKEUP_MASK) {
     return UBX_RXM_PMREQ_BUILD_INVALID_WAKEUP_SOURCES;
   }
 
