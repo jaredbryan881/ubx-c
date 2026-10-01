@@ -168,3 +168,86 @@ ubx_rxm_decode_result_t ubx_rxm_rawx_carrier_phase_stdev_cycles(uint8_t raw, dou
 	
 	return UBX_RXM_DECODE_OK;
 }
+
+// SFRBX validation
+static ubx_rxm_decode_result_t ubx_rxm_sfrbx_validate(const ubx_frame_t *frame){
+	size_t expected;
+
+	if ((frame == NULL) || (frame->payload == NULL)){
+		return UBX_RXM_DECODE_NULL_ARGUMENT;
+	}
+
+	if ((frame->message_class != UBX_RXM_CLASS) || (frame->message_id != UBX_RXM_SFRBX_ID)){
+		return UBX_RXM_DECODE_WRONG_MESSAGE;
+	}
+
+	if (frame->payload_length < UBX_RXM_SFRBX_HEADER_LENGTH){
+		return UBX_RXM_DECODE_WRONG_LENGTH;
+	}
+
+	if (frame->payload[6] != UBX_RXM_SFRBX_VERSION_2){
+		return UBX_RXM_DECODE_UNSUPPORTED_VERSION;
+	}
+
+	expected = (size_t)UBX_RXM_SFRBX_HEADER_LENGTH + (size_t)frame->payload[4] * UBX_RXM_SFRBX_WORD_LENGTH;
+	
+	if ((size_t)frame->payload_length != expected){
+		return UBX_RXM_DECODE_WRONG_LENGTH;
+	}
+
+	return UBX_RXM_DECODE_OK;
+}
+
+// Read the satellite, signal, and word-count
+ubx_rxm_decode_result_t ubx_rxm_sfrbx_decode(const ubx_frame_t *frame, ubx_rxm_sfrbx_t *output){
+	ubx_rxm_decode_result_t result;
+	const uint8_t *data;
+
+	if (output == NULL){
+		return UBX_RXM_DECODE_NULL_ARGUMENT;
+	}
+
+	result = ubx_rxm_sfrbx_validate(frame);
+	
+	if (result != UBX_RXM_DECODE_OK){
+		return result;
+	}
+
+	data = frame->payload;
+	output->gnss_id = data[0];
+	output->satellite_id = data[1];
+	output->signal_id = data[2];
+	output->frequency_id = data[3];
+	output->word_count = data[4];
+	output->channel = data[5];
+	output->version = data[6];
+
+	return UBX_RXM_DECODE_OK;
+}
+
+// Read one navigation word
+ubx_rxm_decode_result_t ubx_rxm_sfrbx_word_decode(const ubx_frame_t *frame,
+												  uint16_t word_index,
+												  uint32_t *output){
+	ubx_rxm_decode_result_t result;
+	const uint8_t *data;
+
+	if (output == NULL){
+		return UBX_RXM_DECODE_NULL_ARGUMENT;
+	}
+
+	result = ubx_rxm_sfrbx_validate(frame);
+
+	if (result != UBX_RXM_DECODE_OK){
+		return result;
+	}
+
+	if (word_index >= frame->payload[4]){
+		return UBX_RXM_DECODE_INDEX_OUT_OF_RANGE;
+	}
+
+	data = frame->payload + UBX_RXM_SFRBX_HEADER_LENGTH + (size_t)word_index * UBX_RXM_SFRBX_WORD_LENGTH;
+	*output = ubx_read_u32_le(data);
+
+	return UBX_RXM_DECODE_OK;
+}

@@ -12,6 +12,8 @@
 #define UBX_CFG_KEY_MSGOUT_TIM_TP_UART1 UINT32_C(0x2091017E)
 // Raw observations on the GNSS receiver's UART1 interface
 #define UBX_CFG_KEY_MSGOUT_RXM_RAWX_UART1 UINT32_C(0x209102A5)
+// Broadcast navigation data on the GNSS receiver's UART1 interface
+#define UBX_CFG_KEY_MSGOUT_RXM_SFRBX_UART1 UINT32_C(0x20910232)
 
 // Navigation and measurement rate
 #define UBX_CFG_KEY_RATE_MEAS    UINT32_C(0x30210001)
