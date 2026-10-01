@@ -30,14 +30,14 @@ static inline uint64_t ubx_read_u64_le(const uint8_t *data) {
 static inline float ubx_read_r4_le(const uint8_t *data) {
   uint32_t bits = ubx_read_u32_le(data);
   float value;
-  (void)memcpy(&value, &bits, sizeof(value));
+  memcpy(&value, &bits, sizeof(value));
   return value;
 }
 
 static inline double ubx_read_r8_le(const uint8_t *data) {
   uint64_t bits = ubx_read_u64_le(data);
   double value;
-  (void)memcpy(&value, &bits, sizeof(value));
+  memcpy(&value, &bits, sizeof(value));
   return value;
 }
 
