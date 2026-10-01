@@ -4,6 +4,7 @@
 static ubx_rxm_decode_result_t
 ubx_rxm_rawx_validate(const ubx_frame_t *frame) {
   size_t expected_length;
+  size_t measurement_count;
 
   if ((frame == NULL) || (frame->payload == NULL)) {
     return UBX_RXM_DECODE_NULL_ARGUMENT;
@@ -22,8 +23,9 @@ ubx_rxm_rawx_validate(const ubx_frame_t *frame) {
     return UBX_RXM_DECODE_UNSUPPORTED_VERSION;
   }
 
+  measurement_count = (size_t)frame->payload[11];
   expected_length = (size_t)UBX_RXM_RAWX_HEADER_LENGTH +
-                    ((size_t)frame->payload[11] *
+                    (measurement_count *
                      (size_t)UBX_RXM_RAWX_MEASUREMENT_LENGTH);
 
   if ((size_t)frame->payload_length != expected_length) {
@@ -63,6 +65,7 @@ ubx_rxm_decode_result_t ubx_rxm_rawx_measurement_decode(
     ubx_rxm_rawx_measurement_t *output) {
   ubx_rxm_decode_result_t result;
   const uint8_t *payload;
+  size_t offset;
 
   if (output == NULL) {
     return UBX_RXM_DECODE_NULL_ARGUMENT;
@@ -73,13 +76,14 @@ ubx_rxm_decode_result_t ubx_rxm_rawx_measurement_decode(
     return result;
   }
 
-  if (measurement_index >= frame->payload[11]) {
+  if ((size_t)measurement_index >= (size_t)frame->payload[11]) {
     return UBX_RXM_DECODE_INDEX_OUT_OF_RANGE;
   }
 
-  payload = &frame->payload[UBX_RXM_RAWX_HEADER_LENGTH +
-                            ((size_t)measurement_index *
-                             (size_t)UBX_RXM_RAWX_MEASUREMENT_LENGTH)];
+  offset = (size_t)UBX_RXM_RAWX_HEADER_LENGTH +
+           ((size_t)measurement_index *
+            (size_t)UBX_RXM_RAWX_MEASUREMENT_LENGTH);
+  payload = &frame->payload[offset];
 
   output->pseudorange = ubx_read_r8_le(&payload[0]);
   output->carrier_phase = ubx_read_r8_le(&payload[8]);
