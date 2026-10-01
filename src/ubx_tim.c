@@ -2,10 +2,14 @@
 #include "ubx_internal.h"
 
 ubx_tim_tp_decode_result_t ubx_tim_tp_decode(const ubx_frame_t *frame,
-                                             ubx_tim_tp_t *output) {
+                                              ubx_tim_tp_t *output) {
   const uint8_t *payload;
 
   if ((frame == NULL) || (output == NULL)) {
+    return UBX_TIM_TP_DECODE_NULL_ARGUMENT;
+  }
+
+  if (frame->payload == NULL) {
     return UBX_TIM_TP_DECODE_NULL_ARGUMENT;
   }
 
@@ -16,10 +20,6 @@ ubx_tim_tp_decode_result_t ubx_tim_tp_decode(const ubx_frame_t *frame,
 
   if (frame->payload_length != UBX_TIM_TP_PAYLOAD_LENGTH) {
     return UBX_TIM_TP_DECODE_WRONG_LENGTH;
-  }
-
-  if (frame->payload == NULL) {
-    return UBX_TIM_TP_DECODE_NULL_ARGUMENT;
   }
 
   payload = frame->payload;
