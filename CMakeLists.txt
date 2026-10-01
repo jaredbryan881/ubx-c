@@ -32,6 +32,7 @@ add_library(ubx
     src/ubx_encoder.c
     src/ubx_nav.c
     src/ubx_parser.c
+    src/ubx_rxm.c
     src/ubx_tim.c
 )
 target_include_directories(ubx
