@@ -1,0 +1,175 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  autofix:
+    runs-on: ubuntu-24.04
+    # Fork PRs can't be pushed to; the check jobs below still run on them.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.commit.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends cmake ninja-build clang clang-tidy clang-format
+
+      - name: Configure (compile_commands.json)
+        run: cmake -S . -B build-fix -G Ninja -DCMAKE_C_COMPILER=clang -DUBX_BUILD_TESTS=OFF
+
+      - name: clang-tidy --fix
+        # Only some checks have fixes; the clang-tidy job reports what remains.
+        run: clang-tidy -p build-fix --fix -header-filter='.*/(src|include)/.*' src/*.c || true
+
+      - name: clang-format
+        run: |
+          if [ -f .clang-format ]; then
+            clang-format -i src/*.c src/*.h include/*.h tests/*.c
+          fi
+
+      - name: Add missing end-of-file newlines
+        run: |
+          for f in src/*.c src/*.h include/*.h tests/*.c; do
+            if [ -n "$(tail -c1 "$f")" ]; then
+              echo >> "$f"
+            fi
+          done
+
+      - name: Commit and push fixes
+        id: commit
+        run: |
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -am "CI autofix: clang-tidy, clang-format, EOF newline"
+            git push
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  build-and-test:
+    needs: autofix
+    if: ${{ !cancelled() && needs.autofix.result != 'failure' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.autofix.outputs.sha }}
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends cmake ninja-build ${{ matrix.compiler }}
+
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_C_COMPILER=${{ matrix.compiler }}
+          -DUBX_WARNINGS_AS_ERRORS=ON
+          -DUBX_SANITIZE=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  misra:
+    needs: autofix
+    if: ${{ !cancelled() && needs.autofix.result != 'failure' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.autofix.outputs.sha }}
+
+      - name: Install cppcheck
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends cppcheck
+
+      - name: MISRA C:2012 (cppcheck addon)
+        run: tools/misra/run.sh
+
+  clang-tidy:
+    needs: autofix
+    if: ${{ !cancelled() && needs.autofix.result != 'failure' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.autofix.outputs.sha }}
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends cmake ninja-build clang clang-tidy
+
+      - name: Configure (compile_commands.json)
+        run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DUBX_BUILD_TESTS=OFF
+
+      - name: clang-tidy
+        run: clang-tidy -p build src/*.c
+
+  format-check:
+    needs: autofix
+    if: ${{ !cancelled() && needs.autofix.result != 'failure' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.autofix.outputs.sha }}
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends clang-format
+
+      - name: Check formatting
+        run: |
+          test -f .clang-format || { echo "No .clang-format in repo; skipping enforcement."; exit 0; }
+          clang-format --dry-run --Werror src/*.c src/*.h include/*.h tests/*.c
+
+  fuzz-smoke:
+    needs: autofix
+    if: ${{ !cancelled() && needs.autofix.result != 'failure' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.autofix.outputs.sha }}
+
+      - name: Install clang
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends cmake ninja-build clang
+
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_C_COMPILER=clang
+          -DUBX_BUILD_TESTS=OFF
+          -DUBX_BUILD_FUZZ=ON
+
+      - name: Build fuzzer
+        run: cmake --build build --target fuzz_parser
+
+      - name: Run fuzzer for 60s
+        run: ./build/fuzz/fuzz_parser -max_total_time=60

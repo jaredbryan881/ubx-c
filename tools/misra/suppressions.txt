@@ -1,0 +1,27 @@
+# cppcheck suppressions for the MISRA C:2012 addon.
+# Every entry is a documented deviation. Keep this list short and justified.
+
+# Rule 15.5 (advisory): single point of exit.
+# Deviation: guard-clause early returns are used deliberately for argument
+# validation. Restructuring would add nesting and hurt readability.
+misra-c2012-15.5
+
+# Rule 2.5 (advisory): unused macro declaration.
+# Deviation: macros in include/ form the public API; unused inside the library.
+misra-c2012-2.5
+
+# Rule 2.3 (advisory): unused type declaration.
+# Deviation: public API enum types are consumed by callers, not by the library.
+misra-c2012-2.3
+
+# Rule 2.4 (advisory): unused tag declaration.
+# Deviation: as 2.3, public API types.
+misra-c2012-2.4
+
+# Rule 8.7 (advisory): external linkage used in one translation unit only.
+# Deviation: public API functions are used by library clients.
+misra-c2012-8.7
+
+# cppcheck's own whole-program checks are meaningless for a library
+unusedFunction
+missingIncludeSystem

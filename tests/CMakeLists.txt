@@ -1,0 +1,7 @@
+foreach(name framing cfg decoders)
+    add_executable(test_${name} test_${name}.c)
+    target_link_libraries(test_${name} PRIVATE ubx)
+    target_include_directories(test_${name} PRIVATE ${PROJECT_SOURCE_DIR}/src)
+    target_compile_options(test_${name} PRIVATE ${UBX_WARNING_FLAGS})
+    add_test(NAME ${name} COMMAND test_${name})
+endforeach()
