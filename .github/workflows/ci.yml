@@ -173,3 +173,28 @@ jobs:
 
       - name: Run fuzzer for 60s
         run: ./build/fuzz/fuzz_parser -max_total_time=60
+
+arm-none-eabi-check:
+    needs: autofix
+    if: ${{ !cancelled() && needs.autofix.result != 'failure' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.autofix.outputs.sha }}
+
+      - name: Install Arm Toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends cmake ninja-build gcc-arm-none-eabi
+
+      - name: Configure for Arm Cortex-M7 Target
+        run: >
+          cmake -S . -B build-arm -G Ninja
+          -DCMAKE_SYSTEM_NAME=Generic
+          -DCMAKE_C_COMPILER=arm-none-eabi-gcc
+          -DCMAKE_C_FLAGS="-mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-d16"
+          -DUBX_BUILD_TESTS=OFF
+
+      - name: Build Target Object/Library
+        run: cmake --build build-arm
